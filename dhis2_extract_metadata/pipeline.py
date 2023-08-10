@@ -192,12 +192,16 @@ def get_metadata(
             + [col for col in df.columns if col.startswith("parent")]
             + ["geometry"]
         )
-        df.write_csv(os.path.join(output_dir, "organisation_units.csv"))
+        fp = os.path.join(output_dir, "organisation_units.csv")
+        df.write_csv(fp)
+        current_run.add_file_output(fp)
         current_run.log_info(f"Extracted metadata for {len(df)} organisation units")
 
     if get_org_unit_levels:
         df = pl.DataFrame(dhis.meta.organisation_unit_levels())
-        df.write_csv(os.path.join(output_dir, "organisation_unit_levels.csv"))
+        fp = os.path.join(output_dir, "organisation_unit_levels.csv")
+        df.write_csv(fp)
+        current_run.add_file_output(fp)
         current_run.log_info(
             f"Extracted metadata for {len(df)} organisation unit levels"
         )
@@ -205,7 +209,9 @@ def get_metadata(
     if get_org_unit_groups:
         df = pl.DataFrame(dhis.meta.organisation_unit_groups())
         df = join_lists(df)
-        df.write_csv(os.path.join(output_dir, "organisation_unit_groups.csv"))
+        fp = os.path.join(output_dir, "organisation_unit_groups.csv")
+        df.write_csv(fp)
+        current_run.add_file_output(fp)
         current_run.log_info(
             f"Extracted metadata for {len(df)} organisation unit groups"
         )
@@ -213,35 +219,47 @@ def get_metadata(
     if get_datasets:
         df = pl.DataFrame(dhis.meta.datasets())
         df = join_lists(df)
-        df.write_csv(os.path.join(output_dir, "datasets.csv"))
+        fp = os.path.join(output_dir, "datasets.csv")
+        df.write_csv(fp)
+        current_run.add_file_output(fp)
         current_run.log_info(f"Extracted metadata for {len(df)} datasets")
 
     if get_data_elements:
         df = pl.DataFrame(dhis.meta.data_elements())
-        df.write_csv(os.path.join(output_dir, "data_elements.csv"))
+        fp = os.path.join(output_dir, "data_elements.csv")
+        df.write_csv(fp)
+        current_run.add_file_output(fp)
         current_run.log_info(f"Extracted metadata for {len(df)} data elements")
 
     if get_data_element_groups:
         df = pl.DataFrame(dhis.meta.data_element_groups())
         df = join_lists(df)
-        df.write_csv(os.path.join(output_dir, "data_element_groups.csv"))
+        fp = os.path.join(output_dir, "data_element_groups.csv")
+        df.write_csv(fp)
+        current_run.add_file_output(fp)
         current_run.log_info(f"Extracted metadata for {len(df)} data element groups")
 
     if get_indicators:
         df = pl.DataFrame(dhis.meta.indicators())
-        df.write_csv(os.path.join(output_dir, "indicators.csv"))
+        fp = os.path.join(output_dir, "indicators.csv")
+        df.write_csv(fp)
+        current_run.add_file_output(fp)
         current_run.log_info(f"Extracted metadata for {len(df)} indicators")
 
     if get_indicator_groups:
         df = pl.DataFrame(dhis.meta.indicator_groups())
         df = join_lists(df)
-        df.write_csv(os.path.join(output_dir, "indicator_groups.csv"))
+        fp = os.path.join(output_dir, "indicator_groups.csv")
+        df.write_csv(fp)
+        current_run.add_file_output(fp)
         current_run.log_info(f"Extracted metadata for {len(df)} indicator groups")
 
     if get_coc:
         df = pl.DataFrame(dhis.meta.category_option_combos())
         df = join_lists(df)
-        df.write_csv(os.path.join(output_dir, "category_option_combos.csv"))
+        fp = os.path.join(output_dir, "category_option_combos.csv")
+        df.write_csv(fp)
+        current_run.add_file_output(fp)
         current_run.log_info(f"Extracted metadata for {len(df)} category option combos")
 
     return
