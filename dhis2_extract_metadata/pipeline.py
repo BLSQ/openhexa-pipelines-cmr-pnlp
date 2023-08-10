@@ -7,7 +7,7 @@ from openhexa.sdk import current_run, parameter, pipeline, workspace
 from openhexa.toolbox.dhis2 import DHIS2
 
 
-@pipeline("dhis2-extract-metadata", name="DHIS2 Extract Metadata")
+@pipeline("dhis2-extract-metadata", name="DHIS2 Metadata")
 @parameter(
     "get_org_units",
     name="Organisation units",
