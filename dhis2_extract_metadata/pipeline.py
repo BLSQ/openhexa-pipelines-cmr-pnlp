@@ -9,13 +9,6 @@ from openhexa.toolbox.dhis2 import DHIS2
 
 @pipeline("dhis2-extract-metadata", name="DHIS2 Extract Metadata")
 @parameter(
-    "output_dir",
-    name="Output directory",
-    help="Output directory where metadata files are saved",
-    type=str,
-    required=False,
-)
-@parameter(
     "get_org_units",
     name="Organisation units",
     help="Extract organisation units metadata",
@@ -93,6 +86,13 @@ from openhexa.toolbox.dhis2 import DHIS2
     help="Use cache if possible (NB: data might be outdated)",
     type=bool,
     default=True,
+    required=False,
+)
+@parameter(
+    "output_dir",
+    name="Output directory",
+    help="Output directory where metadata files are saved",
+    type=str,
     required=False,
 )
 def dhis2_extract_metadata(
