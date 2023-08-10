@@ -170,16 +170,18 @@ def get_metadata(
     dhis = DHIS2(con, cache_dir=cache_dir)
     current_run.log_info(f"Connected to {con.url}")
 
-    if not output_dir:
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+    else:
         default_basedir = os.path.join(
             workspace.files_path,
             "pipelines",
             "dhis2-extract-metadata",
         )
-        default_dir = os.path.join(
+        output_dir = os.path.join(
             default_basedir, datetime.now().strftime("%Y-%m-%d_%H:%M:%f")
         )
-        os.makedirs(default_dir, exist_ok=True)
+        os.makedirs(output_dir, exist_ok=True)
         clean_default_output_dir(default_basedir)
 
     if get_org_units:
