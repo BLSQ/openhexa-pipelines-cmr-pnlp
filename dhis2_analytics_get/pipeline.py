@@ -89,7 +89,7 @@ from openhexa.toolbox.dhis2 import DHIS2
     "org_unit_levels",
     name="Organisation unit levels",
     help="Organisation unit levels",
-    type=int,
+    type=str,
     multiple=True,
     required=False,
 )
@@ -115,6 +115,8 @@ def dhis2_analytics_get(
     org_unit_levels=None,
     use_cache=True,
 ):
+    if org_unit_levels:
+        org_unit_levels = [int(level) for level in org_unit_levels]
     get(
         output_dir=output_dir,
         data_elements=data_elements,
