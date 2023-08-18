@@ -123,6 +123,9 @@ def era5_temperature(
 
     meta = get_raster_metadata(datafiles)
 
+    output_dir = os.path.join(workspace.files_path, output_dir)
+    os.makedirs(output_dir, exist_ok=True)
+
     # calculate daily temperature using three different aggregation methods:
     # day mean, day min and day max
     for agg in ["mean", "min", "max"]:
