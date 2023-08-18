@@ -129,8 +129,7 @@ def era5_temperature(
         ds = merge(
             src_files=datafiles,
             dst_file=os.path.join(
-                workspace.files_path,
-                config["output_dir"],
+                output_dir,
                 f"{config['cds_variable']}_{agg}.nc",
             ),
             agg=agg,
