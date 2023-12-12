@@ -171,6 +171,7 @@ def get_metadata(
     current_run.log_info(f"Connected to {con.url}")
 
     if output_dir:
+        output_dir = os.path.join(workspace.files_path, output_dir)
         os.makedirs(output_dir, exist_ok=True)
     else:
         default_basedir = os.path.join(
