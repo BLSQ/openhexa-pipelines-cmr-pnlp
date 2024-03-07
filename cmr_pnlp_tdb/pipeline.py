@@ -117,7 +117,7 @@ def cmr_pnlp_tdb(
     }
 
     if get_run_notebooks:
-        if get_download:
+        if get_download_mape:
             ppml = run_papermill_script(
                 INPUT_NB, 
                 OUTPUT_NB_DIR, 
@@ -172,8 +172,8 @@ def dhis2_download_analytics(output_dir, extract_period, mode, *args, **kwargs):
     aire_list = ous.loc[ous.level == 4].id.to_list()
 
     # TEST
-    fosa_list = fosa_list[:3] 
-    aire_list = aire_list[:3] 
+    # fosa_list = fosa_list[:3] 
+    # aire_list = aire_list[:3] 
 
     # data elements for extract ex: ["aZwnLALknnj", "D3h3Qvl0332"]
     DATA_DIR = f'{workspace.files_path}/Analysis/Routine TDB/data/' # Todo: make global
@@ -233,12 +233,10 @@ def dhis2_download_analytics(output_dir, extract_period, mode, *args, **kwargs):
     # define output path and save file
     current_run.log_info("Creating analytics.csv")
 
-    
-    output_subdir_name = '_test'
 
 
     year = int(str(extract_period[0])[:4])
-    output_dir = f'{output_dir}/{output_directory_name}/{year}{output_subdir_name}'
+    output_dir = f'{output_dir}/{output_directory_name}/{year}'
     os.makedirs(output_dir, exist_ok=True)
 
     out_path = f'{output_dir}/analytics.csv'
