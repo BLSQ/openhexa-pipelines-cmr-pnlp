@@ -1,6 +1,6 @@
 import os
-from datetime import datetime, timedelta
 import shutil
+from datetime import datetime, timedelta
 
 import polars as pl
 from openhexa.sdk import current_run, parameter, pipeline, workspace
@@ -126,7 +126,7 @@ def dhis2_extract_metadata(
 def join_lists(df: pl.DataFrame) -> pl.DataFrame:
     """Transform list values into comma-separated strings for compatibility with CSV."""
     for col in df.columns:
-        if df[col].dtype == pl.List():
+        if df[col].dtype == pl.List:
             df = df.with_columns(
                 pl.when(pl.col(col).list.lengths() > 0)
                 .then(pl.col(col).list.join(", ").alias(col))
