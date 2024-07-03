@@ -4,11 +4,13 @@ from datetime import datetime, timedelta
 
 import polars as pl
 from openhexa.sdk import current_run, parameter, pipeline, workspace
+from openhexa.sdk.workspaces.connection import DHIS2Connection
 from openhexa.toolbox.dhis2 import DHIS2
 from openhexa.toolbox.dhis2.periods import period_from_string
 
 
 @pipeline("dhis2-analytics-get", name="DHIS2 Analytics")
+@parameter("dhis2_connection", name="DHIS2 instance", type=DHIS2Connection)
 @parameter(
     "output_dir",
     name="Output directory",
@@ -103,6 +105,7 @@ from openhexa.toolbox.dhis2.periods import period_from_string
     required=False,
 )
 def dhis2_analytics_get(
+    dhis2_connection: DHIS2Connection,
     output_dir=None,
     data_elements=None,
     data_element_groups=None,
@@ -119,6 +122,7 @@ def dhis2_analytics_get(
     if org_unit_levels:
         org_unit_levels = [int(level) for level in org_unit_levels]
     get(
+        dhis2_connection=dhis2_connection,
         output_dir=output_dir,
         data_elements=data_elements,
         data_element_groups=data_element_groups,
@@ -147,6 +151,7 @@ def clean_default_output_dir(output_dir: str):
 
 @dhis2_analytics_get.task
 def get(
+    dhis2_connection: DHIS2Connection,
     output_dir=None,
     data_elements=None,
     data_element_groups=None,
@@ -160,15 +165,13 @@ def get(
     org_unit_levels=None,
     use_cache=True,
 ):
-    con = workspace.dhis2_connection("CMR-SNIS")
-
     if use_cache:
         cache_dir = os.path.join(workspace.files_path, ".cache")
     else:
         cache_dir = None
 
-    dhis = DHIS2(con, cache_dir=cache_dir)
-    current_run.log_info(f"Connected to {con.url}")
+    dhis = DHIS2(dhis2_connection, cache_dir=cache_dir)
+    current_run.log_info(f"Connected to {dhis2_connection.api.url}")
 
     if output_dir:
         output_dir = os.path.join(workspace.files_path, output_dir)
@@ -179,9 +182,7 @@ def get(
             "pipelines",
             "dhis2-analytics",
         )
-        output_dir = os.path.join(
-            default_basedir, datetime.now().strftime("%Y-%m-%d_%H:%M:%f")
-        )
+        output_dir = os.path.join(default_basedir, datetime.now().strftime("%Y-%m-%d_%H:%M:%f"))
         os.makedirs(output_dir, exist_ok=True)
         clean_default_output_dir(default_basedir)
 
