@@ -171,7 +171,7 @@ def get(
         cache_dir = None
 
     dhis = DHIS2(dhis2_connection, cache_dir=cache_dir)
-    current_run.log_info(f"Connected to {dhis2_connection.api.url}")
+    current_run.log_info(f"Connected to {dhis.api.url}")
 
     if output_dir:
         output_dir = os.path.join(workspace.files_path, output_dir)
