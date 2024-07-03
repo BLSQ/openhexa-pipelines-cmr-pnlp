@@ -2,11 +2,12 @@ import os
 from datetime import datetime
 
 import polars as pl
-from openhexa.sdk import current_run, workspace
+from openhexa.sdk import current_run, pipeline, workspace
 from openhexa.toolbox.dhis2 import DHIS2
 from openhexa.toolbox.dhis2.periods import period_from_string
 
 
+@pipeline("dhis2-analytics-custom", name="DHIS2 Analytics Custom")
 def dhis2_analytics_custom():
     get()
 
