@@ -4,10 +4,12 @@ from datetime import datetime, timedelta
 
 import polars as pl
 from openhexa.sdk import current_run, parameter, pipeline, workspace
+from openhexa.sdk.workspaces.connection import DHIS2Connection
 from openhexa.toolbox.dhis2 import DHIS2
 
 
 @pipeline("dhis2-extract-metadata", name="DHIS2 Metadata")
+@parameter("dhis2_connection", name="DHIS2 instance", type=DHIS2Connection)
 @parameter(
     "get_org_units",
     name="Organisation units",
@@ -96,6 +98,7 @@ from openhexa.toolbox.dhis2 import DHIS2
     required=False,
 )
 def dhis2_extract_metadata(
+    dhis2_connection: DHIS2Connection,
     output_dir: str = None,
     get_org_units: bool = False,
     get_org_unit_levels: bool = False,
@@ -109,6 +112,7 @@ def dhis2_extract_metadata(
     use_cache: bool = True,
 ):
     get_metadata(
+        dhis2_connection,
         output_dir,
         get_org_units,
         get_org_unit_levels,
@@ -148,6 +152,7 @@ def clean_default_output_dir(output_dir: str):
 
 @dhis2_extract_metadata.task
 def get_metadata(
+    dhis2_connection: DHIS2Connection,
     output_dir: str,
     get_org_units: bool = False,
     get_org_unit_levels: bool = False,
@@ -160,15 +165,13 @@ def get_metadata(
     get_coc: bool = False,
     use_cache: bool = True,
 ):
-    con = workspace.dhis2_connection("CMR-SNIS")
-
     if use_cache:
         cache_dir = os.path.join(workspace.files_path, ".cache")
     else:
         cache_dir = None
 
-    dhis = DHIS2(con, cache_dir=cache_dir)
-    current_run.log_info(f"Connected to {con.url}")
+    dhis = DHIS2(dhis2_connection, cache_dir=cache_dir)
+    current_run.log_info(f"Connected to {dhis.api.url}")
 
     if output_dir:
         output_dir = os.path.join(workspace.files_path, output_dir)
@@ -179,20 +182,14 @@ def get_metadata(
             "pipelines",
             "dhis2-extract-metadata",
         )
-        output_dir = os.path.join(
-            default_basedir, datetime.now().strftime("%Y-%m-%d_%H:%M:%f")
-        )
+        output_dir = os.path.join(default_basedir, datetime.now().strftime("%Y-%m-%d_%H:%M:%f"))
         os.makedirs(output_dir, exist_ok=True)
         clean_default_output_dir(default_basedir)
 
     if get_org_units:
         df = pl.DataFrame(dhis.meta.organisation_units())
         df = dhis.meta.add_org_unit_parent_columns(df, org_unit_id_column="id")
-        df = df.select(
-            ["id", "name", "level"]
-            + [col for col in df.columns if col.startswith("parent")]
-            + ["geometry"]
-        )
+        df = df.select(["id", "name", "level"] + [col for col in df.columns if col.startswith("parent")] + ["geometry"])
         fp = os.path.join(output_dir, "organisation_units.csv")
         df.write_csv(fp)
         current_run.add_file_output(fp)
@@ -203,9 +200,7 @@ def get_metadata(
         fp = os.path.join(output_dir, "organisation_unit_levels.csv")
         df.write_csv(fp)
         current_run.add_file_output(fp)
-        current_run.log_info(
-            f"Extracted metadata for {len(df)} organisation unit levels"
-        )
+        current_run.log_info(f"Extracted metadata for {len(df)} organisation unit levels")
 
     if get_org_unit_groups:
         df = pl.DataFrame(dhis.meta.organisation_unit_groups())
@@ -213,9 +208,7 @@ def get_metadata(
         fp = os.path.join(output_dir, "organisation_unit_groups.csv")
         df.write_csv(fp)
         current_run.add_file_output(fp)
-        current_run.log_info(
-            f"Extracted metadata for {len(df)} organisation unit groups"
-        )
+        current_run.log_info(f"Extracted metadata for {len(df)} organisation unit groups")
 
     if get_datasets:
         df = pl.DataFrame(dhis.meta.datasets())
