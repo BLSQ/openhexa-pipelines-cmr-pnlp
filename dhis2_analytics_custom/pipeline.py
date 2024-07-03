@@ -1,220 +1,84 @@
 import os
-import shutil
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import polars as pl
-from openhexa.sdk import current_run, parameter, pipeline, workspace
-from openhexa.sdk.workspaces.connection import DHIS2Connection
+from openhexa.sdk import current_run, workspace
 from openhexa.toolbox.dhis2 import DHIS2
 from openhexa.toolbox.dhis2.periods import period_from_string
 
 
-@pipeline("dhis2-analytics-custom", name="DHIS2 Analytics")
-@parameter("dhis2_connection", name="DHIS2 instance", type=DHIS2Connection)
-@parameter(
-    "output_dir",
-    name="Output directory",
-    help="Output directory where data extract will be saved",
-    type=str,
-    required=False,
-)
-@parameter(
-    "data_elements",
-    name="Data elements",
-    help="UIDs of data elements",
-    type=str,
-    multiple=True,
-    required=False,
-)
-@parameter(
-    "data_element_groups",
-    name="Data element groups",
-    help="UIDs of data element groups",
-    type=str,
-    multiple=True,
-    required=False,
-)
-@parameter(
-    "indicators",
-    name="Indicators",
-    help="UIDs of indicators",
-    type=str,
-    multiple=True,
-    required=False,
-)
-@parameter(
-    "indicator_groups",
-    name="Indicator groups",
-    help="UIDs of indicator groups",
-    type=str,
-    multiple=True,
-    required=False,
-)
-@parameter(
-    "periods",
-    name="Periods",
-    help="DHIS2 periods",
-    type=str,
-    multiple=True,
-    required=False,
-)
-@parameter(
-    "start",
-    name="Period (start)",
-    help="Start of DHIS2 period range",
-    type=str,
-    required=False,
-)
-@parameter(
-    "end",
-    name="Period (end)",
-    help="End of DHIS2 period range",
-    type=str,
-    required=False,
-)
-@parameter(
-    "org_units",
-    name="Organisation units",
-    help="UIDs of organisation units",
-    type=str,
-    multiple=True,
-    required=False,
-)
-@parameter(
-    "org_unit_groups",
-    name="Organisation unit groups",
-    help="UIDs of organisation unit groups",
-    type=str,
-    multiple=True,
-    required=False,
-)
-@parameter(
-    "org_unit_levels",
-    name="Organisation unit levels",
-    help="Organisation unit levels",
-    type=str,
-    multiple=True,
-    required=False,
-)
-@parameter(
-    "use_cache",
-    name="Use cache",
-    help="Use cache if possible (NB: data might be outdated)",
-    type=bool,
-    default=True,
-    required=False,
-)
-def dhis2_analytics_custom(
-    dhis2_connection: DHIS2Connection,
-    output_dir=None,
-    data_elements=None,
-    data_element_groups=None,
-    indicators=None,
-    indicator_groups=None,
-    periods=None,
-    start=None,
-    end=None,
-    org_units=None,
-    org_unit_groups=None,
-    org_unit_levels=None,
-    use_cache=True,
-):
-    if org_unit_levels:
-        org_unit_levels = [int(level) for level in org_unit_levels]
-    get(
-        dhis2_connection=dhis2_connection,
-        output_dir=output_dir,
-        data_elements=data_elements,
-        data_element_groups=data_element_groups,
-        indicators=indicators,
-        indicator_groups=indicator_groups,
-        periods=periods,
-        start=start,
-        end=end,
-        org_units=org_units,
-        org_unit_groups=org_unit_groups,
-        org_unit_levels=org_unit_levels,
-        use_cache=use_cache,
-    )
-
-
-def clean_default_output_dir(output_dir: str):
-    """Delete directories older than 1 month."""
-    for d in os.listdir(output_dir):
-        try:
-            date = datetime.strptime(d, "%Y-%m-%d_%H:%M:%f")
-        except ValueError:
-            continue
-        if datetime.now() - date > timedelta(days=31):
-            shutil.rmtree(os.path.join(output_dir, d))
+def dhis2_analytics_custom():
+    get()
 
 
 @dhis2_analytics_custom.task
-def get(
-    dhis2_connection: DHIS2Connection,
-    output_dir=None,
-    data_elements=None,
-    data_element_groups=None,
-    indicators=None,
-    indicator_groups=None,
-    periods=None,
-    start=None,
-    end=None,
-    org_units=None,
-    org_unit_groups=None,
-    org_unit_levels=None,
-    use_cache=True,
-):
-    if use_cache:
-        cache_dir = os.path.join(workspace.files_path, ".cache")
-    else:
-        cache_dir = None
+def get():
+    # Parameters
+    CONNECTION = "cmr-snis"
+    DATA_ELEMENTS = [
+        "bAZvcaraYLS",
+        "BxQ8HnJEMzG",
+        "c3kSWLkdopg",
+        "c7dLo74Ww9W",
+        "Cf16e6FmTzX",
+        "drO822KakJ6",
+        "fK1DoNkTy7B",
+        "fMq0YfpJQ6r",
+        "gXhkPufIFa4",
+        "hgT3APR8J97",
+        "hoqab2QuF3h",
+        "iLLroHcTxAV",
+        "IPcjv2LbErd",
+        "JoxXUjbWBnQ",
+        "jSHpZfm0moe",
+        "jV7zlrz8kgy",
+        "k3aYUxdQFtc",
+        "n94w97WVd2I",
+        "SfhZNZUlqo8",
+        "WBMFCAI93Y5",
+        "Yl98UdGjD1U",
+        "YXrRpgiIyGr",
+        "Zc93OrBbmrY",
+        "ZWo7w69n7mm",
+    ]
+    START = period_from_string("202401")
+    END = period_from_string(datetime.now().strftime("%Y%m"))
+    ORG_UNIT_LEVELS = [5]
+    OUTPUT_DIR = "Datasets/rma_fosa/2024/T1/surveillance/PNLP_Donnees_rma_fosa_01_05"
 
-    dhis = DHIS2(dhis2_connection, cache_dir=cache_dir)
+    # connect to DHIS2
+    dhis = DHIS2(workspace.dhis2_connection(CONNECTION))
     current_run.log_info(f"Connected to {dhis.api.url}")
 
-    if output_dir:
-        output_dir = os.path.join(workspace.files_path, output_dir)
-        os.makedirs(output_dir, exist_ok=True)
-    else:
-        default_basedir = os.path.join(
-            workspace.files_path,
-            "pipelines",
-            "dhis2-analytics",
-        )
-        output_dir = os.path.join(default_basedir, datetime.now().strftime("%Y-%m-%d_%H:%M:%f"))
-        os.makedirs(output_dir, exist_ok=True)
-        clean_default_output_dir(default_basedir)
+    # create output dir if it does not exist
+    output_dir = os.path.join(workspace.files_path, OUTPUT_DIR)
+    os.makedirs(output_dir, exist_ok=True)
 
     # max elements per request
     dhis.analytics.MAX_DX = 50
     dhis.analytics.MAX_ORG_UNITS = 50
     dhis.analytics.MAX_PERIODS = 1
 
-    if start and end:
-        p1 = period_from_string(start)
-        p2 = period_from_string(end)
-        prange = p1.get_range(p2)
-        periods = [str(pe) for pe in prange]
+    # get list of periods from start and end
+    prange = START.get_range(END)
+    periods = [str(pe) for pe in prange]
 
+    # get data
     data_values = dhis.analytics.get(
-        data_elements=data_elements,
-        data_element_groups=data_element_groups,
-        indicators=indicators,
-        indicator_groups=indicator_groups,
+        data_elements=DATA_ELEMENTS,
         periods=periods,
-        org_units=org_units,
-        org_unit_groups=org_unit_groups,
-        org_unit_levels=org_unit_levels,
+        org_unit_levels=ORG_UNIT_LEVELS,
     )
     current_run.log_info(f"Extracted {len(data_values)} data values")
 
+    # transform dataframe for improved readability
     df = pl.DataFrame(data_values)
     df = dhis.meta.add_dx_name_column(df)
     df = dhis.meta.add_coc_name_column(df)
     df = dhis.meta.add_org_unit_name_column(df)
     df = dhis.meta.add_org_unit_parent_columns(df)
 
+    # write data
     fp = os.path.join(output_dir, "analytics.csv")
     df.write_csv(fp)
     current_run.add_file_output(fp)
