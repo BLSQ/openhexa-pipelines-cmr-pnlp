@@ -1,4 +1,4 @@
-FROM blsq/openhexa-base-environment:1.3.7
+FROM blsq/openhexa-blsq-environment:latest
 
 LABEL org.opencontainers.image.source=https://github.com/blsq/openhexa-pipelines-cmr-pnlp/docker
 LABEL org.opencontainers.image.description="Base OpenHEXA image with additional tools for MS Access"
